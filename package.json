@@ -1,0 +1,20 @@
+{
+  "name": "employee-tracker",
+  "version": "1.0.0",
+  "description": "This program uses SQL to add to employee databses.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anishasnet/employee-tracker.git"
+  },
+  "author": "anishasnet",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/anishasnet/employee-tracker/issues"
+  },
+  "homepage": "https://github.com/anishasnet/employee-tracker#readme"
+}
