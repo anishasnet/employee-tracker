@@ -12,6 +12,7 @@ const connection = mysql.createConnection({
 connection.connect(err => {
     if(err) throw err;
     console.log('Connected as id: ' + connection.threadId);
+    firstQuestion();
 });
 
 
@@ -23,20 +24,12 @@ const firstQuestion = function() {
             message: "What would you like to do?",
             choices: [
                 "View All Employees", 
-                "View Employees By Department",
-                "View Employees By Manager",
                 "Add Employee", 
-                "Remove Employee",
                 "Update Employee Role", 
-                "Update Employee Manager",
                 "View All Roles", 
                 "Add Role", 
-                "Remove Role",
                 "View All Departments", 
-                "View Department Budget",
                 "Add Department", 
-                "Remove Department",
-                
             ],
             validate: choiceSelection => {
                 if (choiceSelection) {
@@ -54,29 +47,12 @@ const firstQuestion = function() {
             viewAllEmployees();
         }
 
-        if(userPurpose === "View Employees By Department"){
-            viewEmployeesByDepartment();
-
-        }
-
-        if(userPurpose === "View Employees By Manager"){
-            viewEmployeesByManager();
-        }
-
         if(userPurpose === "Add Employee"){
             addEmployee();
         }
 
-        if(userPurpose === "Remove Employee"){
-            removeEmployee();
-        }
-
         if(userPurpose === "Update Employee Role"){
             updateEmployeeRole();
-        }
-
-        if(userPurpose === "Update Employee Manager"){
-            updateEmployeeManager();
         }
 
         if(userPurpose === "View All Roles"){
@@ -87,44 +63,65 @@ const firstQuestion = function() {
             addRole();
         }
 
-        if(userPurpose === "Remove Role"){
-            removeRole();
-        }
-
         if(userPurpose === "View All Departments"){
             viewAllDepartments();
         }
-
-        if(userPurpose === "View Department Budget"){
-            viewDepartmentBudget();
-        }
-
         if(userPurpose === "Add Department"){
             addDepartment();
         }
 
-        if(userPurpose === "Remove Department"){
-            removeDepartment();
-        }
     });
 }
 
 const viewAllEmployees = () => {
-   connection.query ('SELECT * FROM department', function(err,employees){
-        if(err) throw err;
-        console.table(employees);
-    });
-
-    connection.query ('SELECT * FROM roles', function(err,employees){
-        if(err) throw err;
-        console.table(employees);
-    });
-
-    connection.query ('SELECT * FROM employee', function(err,employees){
-        if(err) throw err;
-        console.table(employees);
-    });
-    connection.end();
+    connection.query(
+        'DROP TABLE IF EXISTS joinResult',
+        function(err, results) {
+            if (err) throw err;
+        }
+    )
+    connection.query(
+        'DROP TABLE IF EXISTS employeeWithoutManager',
+        function(err, results) {
+            if (err) throw err;
+    
+        }
+    )
+    connection.query(
+        'DROP TABLE IF EXISTS allEmployees',
+        function(err, results) {
+            if (err) throw err;
+            
+        }
+    )
+    connection.query(
+        'CREATE TABLE joinResult AS (SELECT roles.roleid, roles.department_id, roles.salary, roles.title, department.department, department.departmentid FROM roles INNER JOIN department ON roles.department_id = department.departmentid);',
+        function(err, results) {
+            if (err) throw err;
+        }
+    );
+    
+    connection.query(
+        'CREATE TABLE employeeWithoutManager AS (SELECT employee.employeeid, employee.first_name, employee.last_name, employee.role_id, employee.manager_id, joinResult.roleid, joinResult.title, joinResult.department, joinResult.salary FROM employee INNER JOIN joinResult ON employee.role_id = joinResult.roleid);',
+        function(err, results) {
+            if (err) throw err;
+        }
+    )
+    connection.query(
+        "CREATE TABLE allEmployees AS (SELECT e.employeeid, e.first_name, e.last_name, e.title, e.department, e.salary, CONCAT(m.first_name, ' ', m.last_name) AS 'manager' FROM employeeWithoutManager e LEFT JOIN employeeWithoutManager m ON m.employeeid = e.manager_id)",
+        function(err, results) {
+            if (err) throw err;
+            connection.end();
+        }  
+    )
+    connection.query(
+        "SELECT * FROM allEmployees",
+        function(err, results) {
+            if (err) throw err;
+            console.table(results);
+            connection.end();
+        }
+    )
 };
 
 viewEmployeesByDepartment = () => {
@@ -179,4 +176,3 @@ removeDepartment = () => {
 
 };
 
-firstQuestion();
