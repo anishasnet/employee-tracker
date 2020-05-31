@@ -1,5 +1,18 @@
 const inquirer = require("inquirer");
 const mysql = require('mysql2');
+const cTable = require('console.table');
+
+const connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: 'sqlpassword',
+    database: 'employees'
+});
+
+connection.connect(err => {
+    if(err) throw err;
+    console.log('Connected as id: ' + connection.threadId);
+});
 
 
 const firstQuestion = function() {
@@ -34,9 +47,9 @@ const firstQuestion = function() {
             }
         }
     ])
-    .then((purposes) => {
-        const{userPurpose} = purposes;
-
+    .then((purpose) => {
+        const userPurpose = purpose['user purpose'];
+        console.log(purpose)
         if(userPurpose === "View All Employees"){
             viewAllEmployees();
         }
@@ -96,8 +109,22 @@ const firstQuestion = function() {
     });
 }
 
-viewAllEmployees = () => {
+const viewAllEmployees = () => {
+   connection.query ('SELECT * FROM department', function(err,employees){
+        if(err) throw err;
+        console.table(employees);
+    });
 
+    connection.query ('SELECT * FROM roles', function(err,employees){
+        if(err) throw err;
+        console.table(employees);
+    });
+
+    connection.query ('SELECT * FROM employee', function(err,employees){
+        if(err) throw err;
+        console.table(employees);
+    });
+    connection.end();
 };
 
 viewEmployeesByDepartment = () => {
@@ -151,3 +178,5 @@ addDepartment = () => {
 removeDepartment = () => {
 
 };
+
+firstQuestion();
