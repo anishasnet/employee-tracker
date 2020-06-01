@@ -1,3 +1,4 @@
+/* Test values for department table */
 INSERT INTO department (department)
 VALUES 
     ('Sales'),
@@ -5,6 +6,7 @@ VALUES
     ('Legal'),
     ('Finance');
 
+/* Test values for roles table */
 INSERT INTO roles (title, salary, department_id)
 VALUES 
     ('Sales Lead', 190000, 1),
@@ -16,6 +18,7 @@ VALUES
     ('Accountant', 150000, 4),
     ('Account Manager', 175000, 4);
 
+/* Test values for employee table */
 INSERT INTO employee (first_name, last_name, role_id, manager_id)
 VALUES
     ('John', 'Doe', 2, 2),

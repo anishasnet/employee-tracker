@@ -1,7 +1,9 @@
+/* Dependencies */
 const inquirer = require("inquirer");
 const mysql = require('mysql2');
 const cTable = require('console.table');
 
+/* Connecting MySql details*/
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -9,12 +11,14 @@ const connection = mysql.createConnection({
     database: 'employees'
 });
 
+/* Start connection */
 connection.connect(err => {
     if(err) throw err;
     console.log('Connected as id: ' + connection.threadId);
     firstQuestion();
 });
 
+/* Finds index of certain element */
 function myFindIndex(list, name) {
     for (var i = 0; i < list.length; i++) {
         if (list[i] == name) {
@@ -23,6 +27,9 @@ function myFindIndex(list, name) {
     }
 }
 
+/* Inquirer prompts of first series of questions
+ * providing options for user.
+ */
 const firstQuestion = function() {
     inquirer.prompt([
         {
@@ -47,11 +54,11 @@ const firstQuestion = function() {
             }
         }
     ])
+    /* Calls different functions based on user input */
     .then((purpose) => {
         const userPurpose = purpose['userPurpose'];
         if(userPurpose === "View All Employees"){
             viewAllEmployees();
-            firstQuestion();
         }
 
         if(userPurpose === "Add Employee"){
@@ -80,7 +87,9 @@ const firstQuestion = function() {
     });
 }
 
+/* Prints table of all employees */
 const viewAllEmployees = () => {
+    /* Start joining the tables */
     connection.query(
         'DROP TABLE IF EXISTS joinResult',
         function(err, results) {
@@ -120,6 +129,7 @@ const viewAllEmployees = () => {
             if (err) throw err;
         }  
     )
+    /* Actual printing of table */
     connection.query(
         "SELECT * FROM allEmployees ORDER BY allEmployees.employeeid",
         function(err, results) {
@@ -132,14 +142,9 @@ const viewAllEmployees = () => {
     
 };
 
-const viewEmployeesByDepartment = () => {
-
-};
-
-const viewEmployeesByManager = () => {
-
-};
-
+/* Adds an employee based on user
+ * input.
+ */
 const addEmployee = () => {
     var currentRoles =  [];
     let currentManagers = ['None'];
@@ -160,6 +165,7 @@ const addEmployee = () => {
             })
         }
     )
+    /* Getting employee details */
     inquirer.prompt([
         {
             type: "text",
@@ -207,13 +213,13 @@ const addEmployee = () => {
         } else {
             managerId = myFindIndex(currentManagers, answers.manager);
         }
-        
+        /* Adding new employee to table */
         connection.query(
             'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (? , ? , ? , ?)',
             [answers.firstName, answers.lastName, roleId, managerId],
             function(err, results) {
                 if (err) throw err;
-                return;
+                console.log('Employee successfully added.')
             }
         )
         firstQuestion();
@@ -221,10 +227,7 @@ const addEmployee = () => {
 
 };
 
-const removeEmployee = () => {
-
-};
-
+/* Changes the role of an employee */
 const updateEmployeeRole = () => {
     var currentRoles = [];
     connection.query(
@@ -246,6 +249,7 @@ const updateEmployeeRole = () => {
             })
         }
     );
+    /* Prompts what the new role of the employee is */
     inquirer.prompt([
         {
             type: "text",
@@ -267,6 +271,7 @@ const updateEmployeeRole = () => {
     ]).then( answers => {
         var roleId = myFindIndex(currentRoles, answers.newRole);
         var employeeId = myFindIndex(currentEmployees, answers.employee);
+        /* Update table with new roles */
         connection.query(
             'UPDATE employee SET role_id = ? WHERE first_name = ? AND last_name = ?',
             [roleId + 1, currentEmployees[employeeId].split(' ')[0], currentEmployees[employeeId].split(' ')[1]],
@@ -277,18 +282,15 @@ const updateEmployeeRole = () => {
             }
         )
     })
-};
+}
 
-const updateEmployeeManager = () => {
-
-};
-
+/* Prints table of all the roles */
 const viewAllRoles = () => {
     connection.query(
         'SELECT roles.roleid, roles.title, department.department, roles.salary FROM roles INNER JOIN department ON roles.department_id = department.departmentid',
         function(err, results) {
             if (err) throw err;
-            console.log("\n");
+            console.log('\n')
             console.table(results);
             firstQuestion();
         }
@@ -296,6 +298,7 @@ const viewAllRoles = () => {
     
 };
 
+/* Adds a new role to the table */
 const addRole = () => {
     var departments = [];
     connection.query(
@@ -307,6 +310,7 @@ const addRole = () => {
             })
         }
     )
+    /* Prompts user for the new role information */
     inquirer.prompt([
         {
             type: "text",
@@ -342,22 +346,20 @@ const addRole = () => {
         }
     ]).then( answers => {
         let departmentId = myFindIndex(departments, answers.department);
+        /* Adds new role to table */
         connection.query(
             'INSERT INTO roles (title, salary, department_id) VALUES (? , ? , ? );',
-            [answers.title, answers.salary, departmentId],
+            [answers.title, answers.salary, departmentId + 1],
             function(err, results) {
                 if (err) throw err;
                 console.log('Role successfully added.')
                 firstQuestion();
             }
         )
-    })    
+    })
 };
 
-const removeRole = () => {
-
-};
-
+/* Prints a table of all the departments */
 const viewAllDepartments = () => {
     connection.query('SELECT * FROM department', function(err,results) {
         if (err) throw err;
@@ -366,11 +368,9 @@ const viewAllDepartments = () => {
     })
 };
 
-const viewDepartmentBudget = () => {
-
-};
-
+/* Adds a new department to the table */
 const addDepartment = () => {
+    /* Prompts user for department name */
     inquirer.prompt([
         {
             type: "input",
@@ -389,14 +389,11 @@ const addDepartment = () => {
     .then(answer => {
         const sqlEntry = `INSERT INTO department (department) 
         VALUES (?)`;
+        /* Adds the new department to the table */
         connection.query(sqlEntry, answer.addDepartment, (err, result) => {
             if(err) throw err;
             console.log("The department " + answer.addDepartment + " has been added.");
             firstQuestion();
         })
     })
-};
-
-const removeDepartment = () => {
-
 };
