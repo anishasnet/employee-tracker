@@ -2,7 +2,7 @@
 # Employee Tracker
 
 ## Description
-This program uses MySql to store table of employees, roles, and departments. The program prompts the user for information regarding their employees using inquirer. The user can view these tables, and add to them. Here is a walkthrough video for more detail:
+This program uses MySql to store table of employees, roles, and departments. The program prompts the user for information regarding their employees using inquirer. The user can view these tables, and add to them. Here is a walkthrough video for more detail: https://drive.google.com/file/d/1gYiwY635ealPp0rQtMRVdLRN07xDiTLF/view?usp=sharing
 
 ## Table of Contents
 * [Installation](#installation)
