@@ -226,7 +226,57 @@ const removeEmployee = () => {
 };
 
 const updateEmployeeRole = () => {
-
+    var currentRoles = [];
+    connection.query(
+        'SELECT roles.title FROM roles',
+        function(err, results) {
+            if (err) throw err;
+            results.forEach(element => {
+                currentRoles.push(element.title);
+            })
+        }
+    )
+    var currentEmployees = [];
+    connection.query(
+        'SELECT employee.first_name, employee.last_name FROM employee',
+        function(err, results) {
+            if (err) throw err;
+            results.forEach(element => {
+                currentEmployees.push(element.first_name + ' ' + element.last_name);
+            })
+        }
+    );
+    inquirer.prompt([
+        {
+            type: "text",
+            name: "test",
+            message: "Press enter to continue",
+        },
+        {
+            type: "list",
+            name: "employee",
+            message: "Which employee's role would you like to update?",
+            choices: currentEmployees
+        },
+        {
+            type: "list",
+            name: "newRole",
+            message: "What would you lke to update the employee's role to?",
+            choices: currentRoles
+        }
+    ]).then( answers => {
+        var roleId = myFindIndex(currentRoles, answers.newRole);
+        var employeeId = myFindIndex(currentEmployees, answers.employee);
+        connection.query(
+            'UPDATE employee SET role_id = ? WHERE first_name = ? AND last_name = ?',
+            [roleId + 1, currentEmployees[employeeId].split(' ')[0], currentEmployees[employeeId].split(' ')[1]],
+            function(err, results) {
+                if (err) throw err;
+                console.log("Role successfully updated")
+                firstQuestion();
+            }
+        )
+    })
 };
 
 const updateEmployeeManager = () => {
@@ -312,6 +362,7 @@ const viewAllDepartments = () => {
     connection.query('SELECT * FROM department', function(err,results) {
         if (err) throw err;
         console.table(results);
+        firstQuestion();
     })
 };
 
@@ -341,7 +392,7 @@ const addDepartment = () => {
         connection.query(sqlEntry, answer.addDepartment, (err, result) => {
             if(err) throw err;
             console.log("The department " + answer.addDepartment + " has been added.");
-            viewAllDepartments();
+            firstQuestion();
         })
     })
 };
